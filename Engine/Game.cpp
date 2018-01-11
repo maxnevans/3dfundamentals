@@ -20,6 +20,7 @@
  ******************************************************************************************/
 #include "MainWindow.h"
 #include "Game.h"
+#include "Mat.h"
 
 Game::Game( MainWindow& wnd )
 	:
@@ -42,7 +43,23 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
-	Vei2 end = {wnd.mouse.GetPosX(),wnd.mouse.GetPosY()};
-	gfx.DrawLine({399,299}, end, Colors::White);
-	gfx.PutPixel(end.x, end.y, 0xff0000);
+	_vec<float> a1 = {-0.25, -0.25};
+	_vec<float> a2 = { 0.25, -0.25};
+	_vec<float> a3 = { 0.25, 0.25 };
+	_vec<float> a4 = { -0.25, 0.25 };
+
+	a1 = Mat::rotate(a1, wnd.mouse.GetPosX());
+	a2 = Mat::rotate(a2, wnd.mouse.GetPosX());
+	a3 = Mat::rotate(a3, wnd.mouse.GetPosX());
+	a4 = Mat::rotate(a4, wnd.mouse.GetPosX());
+
+	Vei2 converted_a1 =  Mat::conv(a1);
+	Vei2 converted_a2 = Mat::conv(a2);
+	Vei2 converted_a3 = Mat::conv(a3);
+	Vei2 converted_a4 = Mat::conv(a4);
+
+	gfx.DrawLine(converted_a1, converted_a2, Colors::White);
+	gfx.DrawLine(converted_a2, converted_a3, Colors::White);
+	gfx.DrawLine(converted_a3, converted_a4, Colors::White);
+	gfx.DrawLine(converted_a4, converted_a1, Colors::White);
 }

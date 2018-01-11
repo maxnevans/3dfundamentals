@@ -12,6 +12,18 @@ public:
 		y(y)
 	{
 	}
+	template<typename S>
+	_vec(_vec<S> vec)
+		:
+		x((T) vec.x),
+		y((T) vec.y)
+	{}
+	template<typename S>
+	_vec(S x, S y)
+		:
+		x((T) x),
+		y((T) y)
+	{}
 	T length()
 	{
 		return x * x + y * y;
