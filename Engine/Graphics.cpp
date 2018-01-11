@@ -25,6 +25,7 @@
 #include <assert.h>
 #include <string>
 #include <array>
+#include <algorithm>
 
 // Ignore the intellisense error "cannot open source file" for .shh files.
 // They will be created during the build sequence before the preprocessor runs.
@@ -305,6 +306,18 @@ void Graphics::BeginFrame()
 {
 	// clear the sysbuffer
 	memset( pSysBuffer,0u,sizeof( Color ) * Graphics::ScreenHeight * Graphics::ScreenWidth );
+}
+
+void Graphics::DrawLine(const Vei2 p1, const Vei2 p2,const Color c)
+{
+	
+	const int length = (p2 - p1).length_sqrt();
+	for (int i = 0; i < length; i++)
+	{
+		const int x = (p2.x - p1.x)*i/length + p1.x;
+		const int y = (p2.y - p1.y)*i/length + p1.y;
+		PutPixel(x,y,c);
+	}
 }
 
 void Graphics::PutPixel( int x,int y,Color c )

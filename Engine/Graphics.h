@@ -24,6 +24,7 @@
 #include <wrl.h>
 #include "ChiliException.h"
 #include "Colors.h"
+#include "Vec2.h"
 
 class Graphics
 {
@@ -56,6 +57,7 @@ public:
 	{
 		PutPixel( x,y,{ unsigned char( r ),unsigned char( g ),unsigned char( b ) } );
 	}
+	void DrawLine(const Vei2 p1, const Vei2 p2, const Color c);
 	void PutPixel( int x,int y,Color c );
 	~Graphics();
 private:
