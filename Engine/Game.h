@@ -23,6 +23,9 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
+#include "PubeScreenTransformer.h"
+#include "Cube.h"
+#include <cmath>
 
 class Game
 {
@@ -43,4 +46,10 @@ private:
 	/********************************/
 	/*  User Variables              */
 	/********************************/
+	const float dTheta;
+	float theta_x;
+	float theta_y;
+	float theta_z;
+	PubeScreenTransformer pst;
+	Cube cube;
 };

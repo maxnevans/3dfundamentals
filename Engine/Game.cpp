@@ -25,7 +25,12 @@
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd )
+	gfx( wnd ),
+	cube( 1.0f ),
+	dTheta((float)acos(-1)),
+	theta_x(0.0f),
+	theta_y(0.0f),
+	theta_z(0.0f)
 {
 }
 
@@ -39,27 +44,53 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
+	const float dt = 1.0f / 60.0f;
+
+	if (wnd.kbd.KeyIsPressed('Q'))
+	{
+		theta_x += dTheta * dt;
+	}
+	if (wnd.kbd.KeyIsPressed('W'))
+	{
+		theta_y += dTheta * dt;
+	}
+	if (wnd.kbd.KeyIsPressed('E'))
+	{
+		theta_z += dTheta * dt;
+	}
+	if (wnd.kbd.KeyIsPressed('A'))
+	{
+		theta_x -= dTheta * dt;
+	}
+	if (wnd.kbd.KeyIsPressed('S'))
+	{
+		theta_y -= dTheta * dt;
+	}
+	if (wnd.kbd.KeyIsPressed('D'))
+	{
+		theta_z -= dTheta * dt;
+	}
 }
 
 void Game::ComposeFrame()
 {
-	_vec<float> a1 = {-0.25, -0.25};
-	_vec<float> a2 = { 0.25, -0.25};
-	_vec<float> a3 = { 0.25, 0.25 };
-	_vec<float> a4 = { -0.25, 0.25 };
+	auto lines = cube.GetLines();
 
-	a1 = Mat::rotate(a1, wnd.mouse.GetPosX());
-	a2 = Mat::rotate(a2, wnd.mouse.GetPosX());
-	a3 = Mat::rotate(a3, wnd.mouse.GetPosX());
-	a4 = Mat::rotate(a4, wnd.mouse.GetPosX());
+	const Mat<float> rot = 
+		 Mat<float>::RotateX(theta_x)*
+		 Mat<float>::RotateY(theta_y)*
+		 Mat<float>::RotateZ(theta_z);
 
-	Vei2 converted_a1 =  Mat::conv(a1);
-	Vei2 converted_a2 = Mat::conv(a2);
-	Vei2 converted_a3 = Mat::conv(a3);
-	Vei2 converted_a4 = Mat::conv(a4);
 
-	gfx.DrawLine(converted_a1, converted_a2, Colors::White);
-	gfx.DrawLine(converted_a2, converted_a3, Colors::White);
-	gfx.DrawLine(converted_a3, converted_a4, Colors::White);
-	gfx.DrawLine(converted_a4, converted_a1, Colors::White);
+	for (auto& v : lines.vertices)
+	{
+		v *= rot;
+		v += { 0.0f, 0.0f, 2.0f};
+		pst.Transform(v);
+	}
+	for (auto i = lines.indicies.cbegin(), end = lines.indicies.cend();
+		i != end; std::advance(i, 2))
+	{
+		gfx.DrawLine(lines.vertices[*i], lines.vertices[*std::next(i)], Colors::White);
+	}
 }

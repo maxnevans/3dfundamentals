@@ -312,6 +312,7 @@ void Graphics::DrawLine(const Vei2 p1, const Vei2 p2,const Color c)
 {
 	
 	const int length = (p2 - p1).length_sqrt();
+
 	for (int i = 0; i < length; i++)
 	{
 		const int x = (p2.x - p1.x)*i/length + p1.x;
