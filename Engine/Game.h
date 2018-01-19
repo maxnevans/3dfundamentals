@@ -50,6 +50,8 @@ private:
 	float theta_x;
 	float theta_y;
 	float theta_z;
+	float z_offset;
+	float dZ_offset;
 	PubeScreenTransformer pst;
 	Cube cube;
 };

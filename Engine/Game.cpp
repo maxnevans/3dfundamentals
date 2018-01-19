@@ -30,7 +30,9 @@ Game::Game( MainWindow& wnd )
 	dTheta((float)acos(-1)),
 	theta_x(0.0f),
 	theta_y(0.0f),
-	theta_z(0.0f)
+	theta_z(0.0f),
+	z_offset(2.0f),
+	dZ_offset(2.0f)
 {
 }
 
@@ -70,6 +72,15 @@ void Game::UpdateModel()
 	{
 		theta_z -= dTheta * dt;
 	}
+
+	if (wnd.kbd.KeyIsPressed('R'))
+	{
+		z_offset -= dZ_offset  * dt;
+	}
+	if (wnd.kbd.KeyIsPressed('F'))
+	{
+		z_offset += dZ_offset * dt;
+	}
 }
 
 void Game::ComposeFrame()
@@ -85,7 +96,7 @@ void Game::ComposeFrame()
 	for (auto& v : lines.vertices)
 	{
 		v *= rot;
-		v += { 0.0f, 0.0f, 2.0f};
+		v += { 0.0f, 0.0f, z_offset};
 		pst.Transform(v);
 	}
 	for (auto i = lines.indicies.cbegin(), end = lines.indicies.cend();

@@ -12,8 +12,9 @@ public:
 	{}
 	_vec<float>& Transform(_vec3<float>& input) const
 	{
-		input.x = (input.x/input.z + 1)*xFactor;
-		input.y = (-input.y/input.z + 1)*yFactor;
+		const float zInv = 1.0f / input.z;
+		input.x = (input.x*zInv + 1)*xFactor;
+		input.y = (-input.y*zInv + 1)*yFactor;
 
 		return input;
 	}
