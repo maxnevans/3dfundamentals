@@ -34,7 +34,7 @@ public:
 	}
 	_vec3 operator-(const _vec3& v) const
 	{
-		return _vec(x - v.x, y - v.y, z - z*v.z);
+		return _vec3(x - v.x, y - v.y, z - z*v.z);
 	}
 	_vec3 operator+(const _vec3& v) const
 	{
@@ -55,6 +55,20 @@ public:
 		z *= alpha;
 		return this;
 	}
+	_vec3 operator%(const _vec3& rhs) const
+	{
+		return {
+			y * rhs.z - z * rhs.y,
+			z * rhs.x - x * rhs.z,
+			x * rhs.y - y * rhs.x
+		};
+	}
+	T operator*(const _vec3& rhs) const
+	{
+		return x * rhs.x + y * rhs.y + z * rhs.z;
+	}
 public:
 	T z;
 };
+
+typedef _vec3<float> Vec3;

@@ -36,9 +36,18 @@ public:
 	{
 		return _vec(x - v.x, y - v.y);
 	}
+	_vec operator*(const T factor) const
+	{
+		return {x*factor, y*factor};
+	}
+	_vec operator+(const _vec& rhs) const
+	{
+		return {x + rhs.x, y+rhs.y};
+	}
 public:
 	T x;
 	T y;
 };
 
 typedef _vec<int> Vei2;
+typedef _vec<float> Vec2;
