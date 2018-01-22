@@ -308,7 +308,7 @@ void Graphics::BeginFrame()
 	memset( pSysBuffer,0u,sizeof( Color ) * Graphics::ScreenHeight * Graphics::ScreenWidth );
 }
 
-void Graphics::DrawLine(const Vei2 p1, const Vei2 p2,const Color c)
+void Graphics::DrawLine(const Vei2& p1, const Vei2& p2,const Color& c)
 {
 	
 	const int length = (p2 - p1).length_sqrt();
@@ -330,6 +330,104 @@ void Graphics::PutPixel( int x,int y,Color c )
 	pSysBuffer[Graphics::ScreenWidth * y + x] = c;
 }
 
+void Graphics::DrawTriangle(const Vec2 & p0, const Vec2 & p1, const Vec2 & p2, const Color & c)
+{
+	const Vec2* pv0 = &p0;
+	const Vec2* pv1 = &p1;
+	const Vec2* pv2 = &p2;
+
+	//Sorting points ASCENDING by Y factor
+	if (pv0->y > pv1->y) std::swap(pv0,pv1);
+	if (pv2->y < pv1->y)
+	{
+		std::swap(pv1, pv2);
+		if (pv1->y < pv0->y) std::swap(pv1, pv0);
+	}
+
+	
+	if (pv0->y == pv1->y) //Natural Flat Top Triangle
+	{
+		//Sorting by X
+		if (pv0->x > pv1->x) std::swap(pv0, pv1);
+		DrawTopFlatTriangle(*pv0, *pv1, *pv2, c);
+	}
+	else if (pv1->y == pv2->y) //Natural Flat Bottom Triangle
+	{
+		//Soring by X
+		if (pv1->x > pv2->x) std::swap(pv1, pv2);
+		DrawBottomFlatTriangle(*pv0, *pv1, *pv2, c);
+	} 
+	else // General Triangle
+	{
+		//Find splitting vertex
+		const float alphaSplit = (pv1->y - pv0->y) / (pv2->y - pv0->y);
+		const Vec2 vi = *pv0 + (*pv2 - *pv0)*alphaSplit;
+		
+		if (vi.x > pv1->x) //Major right
+		{
+			DrawBottomFlatTriangle(*pv0, *pv1, vi, c);
+			DrawTopFlatTriangle(*pv1, vi, *pv2, c);
+		}
+		else //Major left
+		{
+			DrawBottomFlatTriangle(*pv0, vi, *pv1, c);
+			DrawTopFlatTriangle(vi, *pv1, *pv2, c);
+		}
+
+	}
+}
+
+void Graphics::DrawTopFlatTriangle( const Vec2& v0,const Vec2& v1,const Vec2& v2,const Color& c )
+{
+	// calulcate slopes in screen space
+	float m0 = (v2.x - v0.x) / (v2.y - v0.y);
+	float m1 = (v2.x - v1.x) / (v2.y - v1.y);
+
+	// calculate start and end scanlines
+	const int yStart = (int)ceil( v0.y - 0.5f );
+	const int yEnd = (int)ceil( v2.y - 0.5f ); // the scanline AFTER the last line drawn
+
+	for( int y = yStart; y < yEnd; y++ )
+	{
+		// caluclate start and end points (x-coords)
+		// add 0.5 to y value because we're calculating based on pixel CENTERS
+		const float px0 = m0 * (float( y ) + 0.5f - v0.y) + v0.x;
+		const float px1 = m1 * (float( y ) + 0.5f - v1.y) + v1.x;
+
+		// calculate start and end pixels
+		const int xStart = (int)ceil( px0 - 0.5f );
+		const int xEnd = (int)ceil( px1 - 0.5f ); // the pixel AFTER the last pixel drawn
+
+		for( int x = xStart; x < xEnd; x++ )
+		{
+			PutPixel( x,y,c );
+		}
+	}
+}
+
+
+void Graphics::DrawBottomFlatTriangle(const Vec2 & p0, const Vec2 & p1, const Vec2 & p2, const Color & c)
+{
+	const float m0 = (p1.x - p0.x) / (p1.y - p0.y);
+	const float m1 = (p2.x - p0.x) / (p2.y - p0.y);
+
+	const int yStart = (int) ceil ( p0.y  - 0.5f);
+	const int yEnd = (int) ceil ( p2.y - 0.5f);
+
+	for (int y = yStart; y < yEnd; y++)
+	{
+		const float px0 = m0 * ((float)y + 0.5f - p0.y) + p0.x;
+		const float px1 = m1 * ((float)y + 0.5f - p0.y) + p0.x;
+
+		const int xStart = (int) ceil (px0 - 0.5f);
+		const int xEnd = (int) ceil (px1 - 0.5f);
+
+		for (int x = xStart; x < xEnd; x++)
+		{
+			PutPixel(x, y, c);
+		}
+	}
+}
 
 //////////////////////////////////////////////////
 //           Graphics Exception

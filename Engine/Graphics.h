@@ -57,9 +57,13 @@ public:
 	{
 		PutPixel( x,y,{ unsigned char( r ),unsigned char( g ),unsigned char( b ) } );
 	}
-	void DrawLine(const Vei2 p1, const Vei2 p2, const Color c);
+	void DrawLine(const Vei2& p1, const Vei2& p2, const Color& c);
 	void PutPixel( int x,int y,Color c );
+	void DrawTriangle(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Color& c);
 	~Graphics();
+private:
+	void DrawTopFlatTriangle(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Color& c);
+	void DrawBottomFlatTriangle(const Vec2& p0, const Vec2& p1, const Vec2& p2, const Color& c);
 private:
 	Microsoft::WRL::ComPtr<IDXGISwapChain>				pSwapChain;
 	Microsoft::WRL::ComPtr<ID3D11Device>				pDevice;
