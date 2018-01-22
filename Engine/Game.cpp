@@ -21,13 +21,14 @@
 #include "MainWindow.h"
 #include "Game.h"
 #include "Mat.h"
+#include "ChiliMath.h"
 
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
 	gfx( wnd ),
 	cube( 1.0f ),
-	dTheta((float)acos(-1)),
+	dTheta(PI),
 	theta_x(0.0f),
 	theta_y(0.0f),
 	theta_z(0.0f),
@@ -50,27 +51,27 @@ void Game::UpdateModel()
 
 	if (wnd.kbd.KeyIsPressed('Q'))
 	{
-		theta_x += dTheta * dt;
+		theta_x = wrap_angle(theta_x + dTheta * dt);
 	}
 	if (wnd.kbd.KeyIsPressed('W'))
 	{
-		theta_y += dTheta * dt;
+		theta_y = wrap_angle(theta_y + dTheta * dt);
 	}
 	if (wnd.kbd.KeyIsPressed('E'))
 	{
-		theta_z += dTheta * dt;
+		theta_z = wrap_angle(theta_z + dTheta * dt);
 	}
 	if (wnd.kbd.KeyIsPressed('A'))
 	{
-		theta_x -= dTheta * dt;
+		theta_x = wrap_angle(theta_x - dTheta * dt);
 	}
 	if (wnd.kbd.KeyIsPressed('S'))
 	{
-		theta_y -= dTheta * dt;
+		theta_y = wrap_angle(theta_y - dTheta * dt);
 	}
 	if (wnd.kbd.KeyIsPressed('D'))
 	{
-		theta_z -= dTheta * dt;
+		theta_z = wrap_angle(theta_z - dTheta * dt);
 	}
 
 	if (wnd.kbd.KeyIsPressed('R'))
@@ -85,23 +86,61 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
-	auto lines = cube.GetLines();
-
-	const Mat<float> rot = 
-		 Mat<float>::RotateX(theta_x)*
-		 Mat<float>::RotateY(theta_y)*
-		 Mat<float>::RotateZ(theta_z);
-
-
-	for (auto& v : lines.vertices)
+	const Color colors[12] = {
+		Colors::White,
+		Colors::Blue,
+		Colors::Cyan,
+		Colors::Gray,
+		Colors::Green,
+		Colors::Magenta,
+		Colors::LightGray,
+		Colors::Red,
+		Colors::Yellow,
+		Colors::White,
+		Colors::Blue,
+		Colors::Cyan
+	};
+	// generate indexed triangle list
+	auto triangles = cube.GetTriangles();
+	// generate rotation matrix from euler angles
+	const Mat<float> rot =
+		Mat<float>::RotateX(theta_x) *
+		Mat<float>::RotateY(theta_y) *
+		Mat<float>::RotateZ(theta_z);
+	// transform from model space -> world (/view) space
+	for (auto& v : triangles.vertices)
 	{
 		v *= rot;
-		v += { 0.0f, 0.0f, z_offset};
+		v += { 0.0f, 0.0f, z_offset };
+	}
+	// backface culling test (must be done in world (/view) space)
+	for (size_t i = 0,
+		end = triangles.indices.size() / 3;
+		i < end; i++)
+	{
+		const Vec3& v0 = triangles.vertices[triangles.indices[i * 3]];
+		const Vec3& v1 = triangles.vertices[triangles.indices[i * 3 + 1]];
+		const Vec3& v2 = triangles.vertices[triangles.indices[i * 3 + 2]];
+		triangles.cullFlags[i] = (v1 - v0) % (v2 - v0) * v0 > 0.0f;
+	}
+	// transform to screen space (includes perspective transform)
+	for (auto& v : triangles.vertices)
+	{
 		pst.Transform(v);
 	}
-	for (auto i = lines.indicies.cbegin(), end = lines.indicies.cend();
-		i != end; std::advance(i, 2))
+	// draw the mf triangles!
+	for (size_t i = 0,
+		end = triangles.indices.size() / 3;
+		i < end; i++)
 	{
-		gfx.DrawLine(lines.vertices[*i], lines.vertices[*std::next(i)], Colors::White);
+		// skip triangles previously determined to be back-facing
+		if (!triangles.cullFlags[i])
+		{
+			gfx.DrawTriangle(
+				triangles.vertices[triangles.indices[i * 3]],
+				triangles.vertices[triangles.indices[i * 3 + 1]],
+				triangles.vertices[triangles.indices[i * 3 + 2]],
+				colors[i]);
+		}
 	}
 }
