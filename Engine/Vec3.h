@@ -34,7 +34,7 @@ public:
 	}
 	_vec3 operator-(const _vec3& v) const
 	{
-		return _vec3(x - v.x, y - v.y, z - z*v.z);
+		return _vec3(x - v.x, y - v.y, z - v.z);
 	}
 	_vec3 operator+(const _vec3& v) const
 	{
